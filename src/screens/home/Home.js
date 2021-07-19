@@ -36,19 +36,28 @@ function Home() {
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(true);
   const [movies, setMovies] = useState([]);
-
+  const [genres, setGenres] = useState([]);
+  const [artists, setArtists] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [selectedMovies, setSelectedMovies] = useState([]);
   const history = useHistory();
-
+  const [selectedgenre, setSelectedGenre] = useState("");
+  const [selectedartists, setSelectedArtists] = useState("");
   const openDetails = (p) => {
     console.log("inside Home", p);
     history.push("/details", { details: p });
   };
 
-  function handleFilter() {
-    console.log("");
-  }
+  const handleGenreChange = (event) => {
+    setSelectedGenre(event.target.value);
+  };
 
-  useEffect(() => {
+  const handleArtistsChange = (event) => {
+    setSelectedArtists(event.target.value);
+  };
+
+  function loadMovies() {
     setIsLoaded(true);
     fetch("http://localhost:8085/api/v1/movies/")
       .then((res) => res.json())
@@ -65,13 +74,67 @@ function Home() {
           setError(error);
         }
       );
+  }
+
+  function loadGenres() {
+    fetch("http://localhost:8085/api/v1/genres/")
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          console.log(result.genres);
+          setGenres(result.genres);
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          setIsLoaded(false);
+          setError(error);
+        }
+      );
+  }
+
+  function loadArtists() {
+    fetch("http://localhost:8085/api/v1/artists/")
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          console.log(result.artists);
+          setArtists(result.artists);
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          setIsLoaded(false);
+          setError(error);
+        }
+      );
+  }
+
+  useEffect(() => {
+    loadMovies();
+    loadGenres();
+    loadArtists();
   }, []);
+
+  useEffect(() => {
+    setFilteredMovies(
+      movies.filter((movie) =>
+        movie.title.toLowerCase().includes(search.toLowerCase())
+      )
+      // .filter((genre) =>
+      //   genre.genres.toLowerCase().includes(search.toLowerCase())
+      // )
+    );
+  }, [search, movies, genres]);
 
   if (error) {
     return <div>Error: {error.message}</div>;
   } else if (isLoaded) {
     return <div>Loading...</div>;
   } else {
+    console.log(movies);
     return (
       <Fragment>
         <div className="homeHeader">Upcoming Movies</div>
@@ -97,7 +160,7 @@ function Home() {
         <div style={{ display: "flex" }}>
           <div className="moviesContainer">
             <ImageList rowHeight={350} cols={4}>
-              {movies.map((p) => (
+              {filteredMovies.map((p) => (
                 <GridListTile
                   key={p.id}
                   cellHeight={250}
@@ -126,15 +189,23 @@ function Home() {
               <CardContent>
                 <FormControl className={classes.customStyle} fullWidth>
                   <InputLabel htmlFor="moviename"> Movie Name</InputLabel>
-                  <Input name="moviename"></Input>
+                  <Input
+                    name="moviename"
+                    onChange={(e) => setSelectedMovies(e.target.value)}
+                  ></Input>
                 </FormControl>
                 <br></br>
                 <FormControl className={classes.customStyle} fullWidth>
                   <InputLabel htmlFor="genre">Genre</InputLabel>
-                  <Select name="genre" value="" placeholder="Genre">
-                    {movies.map((p) => (
-                      <MenuItem>
-                        <Checkbox name={p.genres} /> {p.genres}
+                  <Select
+                    name="genre"
+                    value={selectedgenre}
+                    placeholder="Genre"
+                    onChange={handleGenreChange}
+                  >
+                    {genres.map((p) => (
+                      <MenuItem value={p.genre}>
+                        <Checkbox /> {p.genre}
                       </MenuItem>
                     ))}
                   </Select>
@@ -145,13 +216,14 @@ function Home() {
                   <Select
                     id="artists"
                     name="artists"
-                    value=""
+                    value={selectedartists}
                     placeholder="Artists"
+                    onChange={handleArtistsChange}
                   >
-                    {movies.map((p) => (
-                      <MenuItem>
-                        <Checkbox name={p.artists} />
-                        {p.artists}
+                    {artists.map((p) => (
+                      <MenuItem value={p.first_name + " " + p.last_name}>
+                        <Checkbox value={p.first_name + " " + p.last_name} />
+                        {p.first_name + " " + p.last_name}
                       </MenuItem>
                     ))}
                   </Select>
@@ -185,7 +257,7 @@ function Home() {
                   color="primary"
                   type="submit"
                   className={classes.customStyle}
-                  onSubmit={handleFilter}
+                  onClick={() => setSearch(selectedMovies)}
                   fullWidth
                 >
                   APPLY
