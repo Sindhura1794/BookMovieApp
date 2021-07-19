@@ -1,0 +1,39 @@
+.header{
+    background-color: #222;
+    height: 36px;
+    padding: 8px 32px 8px 16px;
+}
+
+.logo{
+    background-color: #ff7f7f;
+    height: 35px;
+    float: left;
+    
+}
+
+@keyframes spin {
+    0% { transform: rotateY(0deg); }
+    100% {  transform: rotateY(360deg); }
+}
+#logo {
+    
+    animation: spin 8s linear infinite;
+
+}
+
+.log-right{
+    float: right;
+}
+
+.tab-format{
+    text-align: center;
+    margin: auto;
+}
+
+
+
+.paper-tab{
+    height: 500px;
+    width :500px;
+    
+}

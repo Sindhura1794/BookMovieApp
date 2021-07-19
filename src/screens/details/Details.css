@@ -1,0 +1,27 @@
+.backButton{
+  margin-left: 24px;
+  margin-top: 8px;
+  margin-bottom: 0px;
+    height: 24px;
+    cursor: pointer;
+
+}
+
+.wrapper{
+    display: flex;
+
+}
+
+.poster{
+    width: 20%;
+   
+}
+.description{
+    width:60%;
+   
+}
+
+.rating{
+ width:20%;
+ 
+}
